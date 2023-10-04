@@ -28,7 +28,7 @@ rule generate_matrix:
     output:
         matrix=expand("{name}.tpm.counts", name=config["name"])
     script:
-        "build_matrix_STAR_tpm.R"
+        "R/build_matrix_STAR_tpm.R"
     doc:
         "Generates TPM counts matrix from RSEM results."
 
@@ -38,6 +38,6 @@ rule generate_raw_counts_matrix:
     output:
         matrix=expand("{name}.rsem.counts", name=config["name"])
     script:
-        "build_matrix_STAR_counts.R"
+        "R/build_matrix_STAR_counts.R"
     doc:
         "Generates raw counts matrix from RSEM results."
