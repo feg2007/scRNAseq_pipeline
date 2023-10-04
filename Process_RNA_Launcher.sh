@@ -22,7 +22,7 @@ if [ -z "$META_PATH" ] || [ -z "$PIPELINE_PATH" ] || [ -z "$CLUSTER_CONFIG" ] ||
 fi
 
 # Reference to run_RNA.sh script
-RNA_SCRIPT="run_RNA.sh"
+RNA_SCRIPT="Run_RNA.sh"
 
 # Check if META_PATH and PIPELINE_PATH exist and are directories
 for directory in "$META_PATH" "$PIPELINE_PATH"; do

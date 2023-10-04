@@ -22,11 +22,11 @@ This pipeline integrates Snakemake with a set of scripts and workflows for proce
    git clone https://github.com/GaitiLab/scRNAseq_pipeline.git
    cd scRNAseq_pipeline
    ```
-2. Modify the SLURM scripts to ensure they contain the proper partitions and email addresses for your accounts, especially for `run_RNA.sh`.
+2. Modify the SLURM scripts to ensure they contain the proper partitions and email addresses for your accounts, especially for `Run_RNA.sh`.
 3. Modify the cluster.yaml file to ensure it is compatible with the HPC you are using for the run.
-3. Run the master script, which will submit jobs for each sample. For more details see the [Parameters](#parameters-for-processrnalaunchersh) section below.
+3. Run the master script, which will submit jobs for each sample. For more details see the [Parameters](#parameters-for-process_rna_launchersh) section below.
     ```bash
-    ./ProcessRNALauncher.sh -m path_to_scRNA_FASTQ_sample_dirs/ \
+    ./Process_RNA_Launcher.sh -m path_to_scRNA_FASTQ_sample_dirs/ \
                             -p path_to_pipeline/ \
                             -c path_to_cluster_config/ \
                             -r path_to_ref_genome/
@@ -66,8 +66,8 @@ For each sample, you will obtain:
 1. `.tpm.counts file`: A matrix of TPM values with genes as rows and cells as columns.
 2. `.rsem.counts file`: A matrix of raw counts with genes as rows and cells as columns.
 
-## Parameters for `ProcessRNALauncher.sh`
-When executing the `ProcessRNALauncher.sh` script, it requires several parameters to function correctly:
+## Parameters for `Process_RNA_Launcher.sh`
+When executing the `Process_RNA_Launcher.sh` script, it requires several parameters to function correctly:
 
 ### 1. `META_PATH` (m)
 This is the path to the root directory containing all the samples. Each sample directory should have a sub-directory named fastq which contains the paired-end fastq files for multiple cells.
@@ -82,7 +82,7 @@ Path to the configuration file for cluster parameters. This config file is used 
 ### 4. `REF_GENOME` (r)
 Path to the reference genome to be used for the analysis. (*Note that this is the path to the directory and not the genome fasta itself.*) This needs to be generated using STAR or even through RSEM. See their respecitve documentation for more details ([STAR](https://github.com/alexdobin/STAR), [RSEM](https://deweylab.github.io/RSEM/rsem-prepare-reference.html)).
 
-Once these parameters are correctly set, you can execute the master_RNA.sh script, and it will in turn utilize the run_RNA.sh script for processing each sample. Remember to ensure that the SLURM scripts have the necessary permissions for execution (```chmod +x script_name.sh```).
+Once these parameters are correctly set, you can execute the master_RNA.sh script, and it will in turn utilize the `Run_RNA.sh` script for processing each sample. Remember to ensure that the SLURM scripts have the necessary permissions for execution (```chmod +x script_name.sh```).
 
 ## Contributing
 If you find any bugs or would like to improve the pipeline, please create an issue or submit a pull request.
