@@ -4,7 +4,7 @@ A comprehensive pipeline for processing single-cell RNA-Seq data, generating TPM
 
 ## Description
 
-This pipeline integrates Snakemake with a set of scripts and workflows for processing single-cell RNA-Seq data. It reads RSEM results from multiple paired-end fastq files for each cell within a sample, extracts TPM values and raw counts, and creates matrices annotated with gene symbols from the ENSEMBL database. The pipeline is designed for efficiency and speed, utilizing the `data.table` R package for fast data I/O.
+This pipeline integrates Snakemake with a set of scripts and workflows for processing single-cell RNA-Seq data. It reads RSEM results from multiple paired-end fastq files for each cell within a sample, extracts TPM values and raw counts, and creates matrices annotated with gene symbols from the ENSEMBL database.
 
 ## Requirements
 
@@ -14,6 +14,8 @@ This pipeline integrates Snakemake with a set of scripts and workflows for proce
 - [STAR](https://github.com/alexdobin/STAR) (>= 2.7.9a)
 - [RSEM](https://deweylab.github.io/RSEM/) (>= 1.3.0)
 - Python (>= 3.6)
+
+**Note:** Older versions may work. However these recommendations are the versions with which this pipeline was tested.
 
 ## Usage
 
