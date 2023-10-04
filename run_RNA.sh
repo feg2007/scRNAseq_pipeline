@@ -12,15 +12,30 @@
 #SBATCH --output=slurm_outputs/%x_%j.out
 #SBATCH --error=slurm_outputs/%x_%j.out
 
-# Get full paths
-MY_PATH=$(readlink -f ${1})
-MY_PIPELINE=$(readlink -f ${2})
+while getopts ":s:p:c:r:" opt; do
+  case $opt in
+    s) MY_PATH=$(readlink -f "$OPTARG")
+    ;;
+    p) MY_PIPELINE=$(readlink -f "$OPTARG")
+    ;;
+    c) MY_CLUSTER_CONFIG=$(readlink -f "$OPTARG")
+    ;;
+    r) MY_REF_GENOME=$(readlink -f "$OPTARG")
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+# Check if mandatory arguments are provided
+if [ -z "$MY_PATH" ] || [ -z "$MY_PIPELINE" ] || [ -z "$MY_CLUSTER_CONFIG" ] || [ -z "$MY_REF_GENOME" ]; then
+    echo "Usage: $0 -s <sample_directory> -p <path_to_pipeline_directory> -c <cluster_config_file> -r <path_to_ref_genome>"
+    exit 1
+fi
 
 # Echo variable paths to standard output
 echo "Processing files in ${MY_PATH}..."
 echo "Using pipeline from ${MY_PIPELINE}..."
-
-MY_CLUSTER_CONFIG=$(readlink -f ${3})
 echo "Submitting to cluster with configuration ${MY_CLUSTER_CONFIG}..."
 
 name="${MY_PATH##*/}"
@@ -37,21 +52,27 @@ fi
 # Clear config file or create a new unique one
 > config.yaml
 
-echo "path: ${MY_PATH}/fastq" > config.yaml
-echo "name: ${name}" >> config.yaml
-echo "samples:" >> config.yaml
-
-for file in *R1_001.fastq; do
-    sample=`basename $file _R1_001.fastq`
-    echo "- ${sample}" >> config.yaml
-done
-
 module load STAR/2.7.9a
 module load R/4.2.1
 module load python3
 module load snakemake/7.3.8
 module load perl/5.30.0
 module load rsem/1.3.0
+
+# Determine the directory containing the STAR executable
+STAR_DIR=$(dirname $(which STAR))
+
+# Now, use the STAR_DIR variable when creating the config.yaml file
+echo "path: ${MY_PATH}/fastq" > config.yaml
+echo "name: ${name}" >> config.yaml
+echo "star_path: ${STAR_DIR}" >> config.yaml  # Using the determined STAR directory path
+echo "ref_genome: ${MY_REF_GENOME}" >> config.yaml
+echo "samples:" >> config.yaml
+
+for file in *R1_001.fastq; do
+    sample=`basename $file _R1_001.fastq`
+    echo "- ${sample}" >> config.yaml
+done
 
 # Check if logs directory exists
 if [[ ! -d "../logs" ]]; then

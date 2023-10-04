@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
 
-# Check if the right number of arguments are provided
-if [[ $# -ne 3 ]]; then
-    echo "Usage: $0 <path_to_RNA_FASTQs> <path_to_pipeline_directory> <cluster_config_file>"
+while getopts ":m:p:c:r:" opt; do
+  case $opt in
+    m) META_PATH="$OPTARG"
+    ;;
+    p) PIPELINE_PATH="$OPTARG"
+    ;;
+    c) CLUSTER_CONFIG="$OPTARG"
+    ;;
+    r) REF_GENOME="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+# Check if mandatory arguments are provided
+if [ -z "$META_PATH" ] || [ -z "$PIPELINE_PATH" ] || [ -z "$CLUSTER_CONFIG" ] || [ -z "$REF_GENOME" ]; then
+    echo "Usage: $0 -m <path_to_RNA_FASTQs> -p <path_to_pipeline_directory> -c <cluster_config_file> -r <path_to_ref_genome>"
     exit 1
 fi
-
-META_PATH="$1"
-PIPELINE_PATH="$2"
-CLUSTER_CONFIG="$3"
 
 # Reference to run_RNA.sh script
 RNA_SCRIPT="run_RNA.sh"
@@ -31,7 +42,7 @@ fi
 for directory in "${META_PATH}"/*; do
     if [[ -d "${directory}/fastq" ]]; then
         echo "Submitting job for directory: ${directory}"
-        sbatch "${RNA_SCRIPT}" "${directory}" "${PIPELINE_PATH}" "${CLUSTER_CONFIG}"
+        sbatch "${RNA_SCRIPT}" "${directory}" "${PIPELINE_PATH}" "${CLUSTER_CONFIG}" "${REF_GENOME}"
     else
         echo "Warning: No 'fastq' sub-directory found in ${directory}. Skipping..."
     fi
