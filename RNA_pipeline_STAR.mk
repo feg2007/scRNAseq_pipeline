@@ -1,6 +1,8 @@
+configfile: "config.yaml"
+
 rule all:
     input:
-       expand("{name}.tpm.counts", name=config["name"])
+        expand("{name}.tpm.counts", name=config["name"])
 
 rule RSEM:
     input:
@@ -8,12 +10,16 @@ rule RSEM:
         R2="{sample}_R2_001.fastq"
     output:
         "{sample}.RSEM.genes.results"
+    log: 
+        "logs/{sample}.rsem.log"
+    threads: 2
     shell:
-        "/RSEM/RSEM-1.3.1/rsem-calculate-expression \
-                        --paired-end --star --star-path /path_to_star \
-                        -p 1 {config[path]}/{input.R1} {config[path]}/{input.R2} \
-                        /path_to_ref_genome \
-                        {config[path]}/{wildcards.sample}.RSEM"
+        """
+        {config[RSEM_path]} --paired-end --star --star-path {config[star_path]} \
+            -p {threads} {config[path]}/{input.R1} {config[path]}/{input.R2} \
+            {config[ref_genome]} {config[path]}/{wildcards.sample}.RSEM \
+            > {log} 2>&1
+        """
 
 rule generate_matrix:
     input:
@@ -22,3 +28,5 @@ rule generate_matrix:
         matrix=expand("{name}.tpm.counts", name=config["name"])
     script:
         "build_matrix_STAR_tpm.R"
+    doc:
+        "Generates TPM counts matrix from RSEM results."
