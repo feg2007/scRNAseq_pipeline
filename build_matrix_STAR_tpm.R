@@ -1,26 +1,40 @@
-args = commandArgs(TRUE)
+# build_matrix_STAR_tpm.R
+# Description: Processes RSEM gene results to create a TPM matrix.
+# Input: Directory path with .RSEM.genes.results files (from Snakemake).
+# Output: TPM matrix with gene SYMBOLs as row names.
+
+# Capture snakemake inputs and outputs
+input_path <- snakemake@config[["path"]]
+output_file <- snakemake@output[["matrix"]]
+
+# Check for required libraries
+required_packages <- c("Homo.sapiens", "data.table")
+new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if(length(new_packages)) stop(paste("Missing packages:", paste(new_packages, collapse=", ")))
 
 library(Homo.sapiens)
+library(data.table)
 
-## List BAMs in Directory and Path to annotation file (.GTF)
-expr_files <- list.files(path = snakemake@config[["path"]], pattern = "*.RSEM.genes.results$")
-expr_matrices <- lapply(expr_files, read.table, sep = "\t", row.names = 1, header = TRUE)
-expr_matrices <- lapply(expr_matrices, subset, select = "TPM")
-expr_matrix <- Reduce(function(df1, df2) cbind(df1, df2), expr_matrices)
-cell_names <- sapply(expr_files, function(x) strsplit(x, ".", fixed = TRUE)[[1]][1])
-colnames(expr_matrix) <- cell_names
+# List and read RSEM files
+expr_files <- list.files(path = input_path, pattern = "*.RSEM.genes.results$", full.names = TRUE)
+if(length(expr_files) == 0) stop("No RSEM files found.")
+expr_matrices <- lapply(expr_files, function(file){
+  dt <- fread(file, data.table = FALSE)  # Read as data.frame
+  if(!"TPM" %in% colnames(dt)) stop(paste("TPM column missing in", file))
+  setNames(dt[,"TPM"], dt[,1])  # Set rownames using the first column (gene IDs)
+})
+expr_matrix <- do.call(cbind, expr_matrices)
 
-## Extract the gene SYMBOL and ENSEMBL ID given ENTREZID accession
-info <- select( Homo.sapiens , keys = rownames(expr_matrix), columns = c("SYMBOL", "ALIAS"), keytype = "ENSEMBL")
+# Annotate genes
+info <- select(Homo.sapiens, keys = rownames(expr_matrix), columns = c("SYMBOL", "ALIAS"), keytype = "ENSEMBL")
 
-## Remove Duplicated Gene SYMBOLs
-expr_matrix <- expr_matrix[!duplicated(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL) ]), ]
+# Remove duplicate and NA SYMBOLs
+unique_symbols <- !duplicated(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)])
+non_na_symbols <- !is.na(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)])
+expr_matrix <- expr_matrix[unique_symbols & non_na_symbols, ]
 
-## Remove NA's
-expr_matrix <- expr_matrix[!is.na(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL) ]), ]
-
-## Replace the rownames of expr_matrix (which are ENTREZID ACCs) with the gene's SYMBOL
+# Update row names with SYMBOLs
 rownames(expr_matrix) <- info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)]
 
-## Write out the expression matrix
-write.table(expr_matrix, snakemake@output[["matrix"]], col.names = TRUE, row.names = TRUE, quote = FALSE, sep = "\t")
+# Write the matrix using fwrite
+fwrite(as.data.table(expr_matrix, keep.rownames = "GeneID"), file = output_file, sep = "\t", quote = FALSE)
