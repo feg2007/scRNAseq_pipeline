@@ -2,7 +2,8 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("{name}.tpm.counts", name=config["name"])
+        expand("{name}.tpm.counts", name=config["name"]),
+        expand("{name}.rsem.counts", name=config["name"])
 
 rule RSEM:
     input:
@@ -30,3 +31,13 @@ rule generate_matrix:
         "build_matrix_STAR_tpm.R"
     doc:
         "Generates TPM counts matrix from RSEM results."
+
+rule generate_raw_counts_matrix:
+    input:
+        files=expand("{dataset}.RSEM.genes.results", dataset=config["samples"])
+    output:
+        matrix=expand("{name}.rsem.counts", name=config["name"])
+    script:
+        "build_matrix_STAR_counts.R"
+    doc:
+        "Generates raw counts matrix from RSEM results."
