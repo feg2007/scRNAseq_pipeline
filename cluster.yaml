@@ -1,15 +1,22 @@
 "__default__":
-    "mem":  "10G"
-    "rt":   "20:00:00"
-map_reads:
-    "mem": "40G"
-    "rt":  "20:00:00"
+  "job-name": "RNA.{rule}.{wildcards}"
+  "partition": "all"
+  "mem": "10G"
+  "mail-type": "END,FAIL"
+  "mail-user": "youremail@example.com"
+  "cpus-per-task": "2"
+  "time": "05:00:00"
+  "output": "../logs/%x_%j.out"
+  "error": "../logs/%x_%j.out"
 generate_matrix:
-    "mem": "40G"
-    "rt":  "20:00:00"
-haplotypecaller:
-    "mem": "40G"
-    "rt":  "20:00:00"
+  "mem": "40G"
+  "partition": "himem"
+  "time": "05:00:00"
+generate_raw_counts_matrix:
+  "mem": "40G"
+  "partition": "himem"
+  "time": "05:00:00"
 RSEM:
-    "mem": "50G"
-    "rt":  "20:00:00"
+  "mem": "50G"
+  "partition": "himem"
+  "time": "05:00:00"
