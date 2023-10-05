@@ -26,8 +26,8 @@ rule merge_fastqs:
 
 rule RSEM:
     input:
-        R1="{path}/single_lane/{sample}_ME_L001_R1_001.fastq".format(path=config['path']),
-        R2="{path}/single_lane/{sample}_ME_L001_R2_001.fastq".format(path=config['path'])
+        R1="{path}/single_lane/{sample}_ME_L001_R1_001.fastq".format(path=config['path'], sample=config['samples']),
+        R2="{path}/single_lane/{sample}_ME_L001_R2_001.fastq".format(path=config['path'], sample=config['samples'])
     output:
         "{sample}.RSEM.genes.results"
     log: 
