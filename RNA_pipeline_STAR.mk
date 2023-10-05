@@ -5,7 +5,9 @@ rule all:
         expand("{name}.tpm.counts", name=config["name"]),
         expand("{name}.rsem.counts", name=config["name"]),
         expand("{name}_metadata.csv", name=config["name"]),
-        expand("{name}_violion_plot.pdf", name=config["name"])
+        expand("{name}_violion_plot.pdf", name=config["name"]),
+        "combined_metadata.csv",
+        "combined_qc_plot.pdf"
 
 rule RSEM:
     input:
@@ -57,4 +59,17 @@ rule RNA_QC:
     shell:
         """
         Rscript {script} {input.scRNA} {output.metadata} {output.violin_plot}
+        """
+
+rule combine_qc_metadata:
+    input:
+        expand("{name}_metadata.csv", name=config["name"])
+    output:
+        combined_metadata = "combined_metadata.csv",
+        combined_plot = "combined_qc_plot.pdf"
+    script:
+        "R/generate_combined_qc.R"
+    shell:
+        """
+        Rscript {script} {input} {output.combined_metadata} {output.combined_plot}
         """
