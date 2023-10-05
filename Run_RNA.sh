@@ -65,12 +65,20 @@ STAR_DIR=$(dirname $(which STAR))
 # Determine the path to the RSEM executable
 RSEM_EXEC=$(which rsem-calculate-expression)
 
+# Check if fastq.gz files exist, otherwise assume .fastq
+if ls ${MY_PATH}/fastq/*R1_001.fastq.gz 1> /dev/null 2>&1; then
+    EXTENSION=".fastq.gz"
+else
+    EXTENSION=".fastq"
+fi
+
 # Now, use the STAR_DIR variable when creating the config.yaml file
 echo "path: ${MY_PATH}/fastq" > config.yaml
 echo "name: ${name}" >> config.yaml
 echo "star_path: ${STAR_DIR}" >> config.yaml  # Using the determined STAR directory path
 echo "RSEM_path: ${RSEM_EXEC}" >> config.yaml  # Using the direct path to the RSEM executable
 echo "ref_genome: ${MY_REF_GENOME}" >> config.yaml
+echo "fastq_extension: ${EXTENSION}" >> config.yaml
 echo "samples:" >> config.yaml
 
 for file in *R1_001.fastq *R1_001.fastq.gz; do
