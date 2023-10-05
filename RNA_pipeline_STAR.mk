@@ -2,6 +2,8 @@ configfile: "config.yaml"
 
 rule all:
     input:
+        expand("{path}/single_lane/{sample}_ME_L001_R1_001.fastq", path=config['path'], sample=config['samples']),
+        expand("{path}/single_lane/{sample}_ME_L001_R2_001.fastq", path=config['path'], sample=config['samples']),
         expand("{name}.tpm.counts", name=config["name"]),
         expand("{name}.rsem.counts", name=config["name"]),
         expand("{name}_metadata.csv", name=config["name"]),
@@ -9,10 +11,23 @@ rule all:
         "combined_metadata.csv",
         "combined_qc_plot.pdf"
 
+rule merge_fastqs:
+    input: 
+        r1=expand("{path}/{sample}_L00*_R1_001.fastq.gz", path=config['path'], sample=config['samples']),
+        r2=expand("{path}/{sample}_L00*_R2_001.fastq.gz", path=config['path'], sample=config['samples'])
+    output:
+        r1_merged="{path}/single_lane/{sample}_ME_L001_R1_001.fastq",
+        r2_merged="{path}/single_lane/{sample}_ME_L001_R2_001.fastq"
+    params:
+        multi_lane_path="{path}/",
+        single_lane_path="{path}/single_lane/"
+    shell:
+        "./merge_script.sh {params.multi_lane_path} {params.single_lane_path} {wildcards.sample}"
+
 rule RSEM:
     input:
-        R1="{{sample}}_R1_001{fastq_extension}".format(fastq_extension=config['fastq_extension']),
-        R2="{{sample}}_R2_001{fastq_extension}".format(fastq_extension=config['fastq_extension'])
+        R1="{path}/single_lane/{sample}_ME_L001_R1_001.fastq".format(path=config['path']),
+        R2="{path}/single_lane/{sample}_ME_L001_R2_001.fastq".format(path=config['path'])
     output:
         "{sample}.RSEM.genes.results"
     log: 
