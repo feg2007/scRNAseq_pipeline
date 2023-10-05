@@ -3,7 +3,9 @@ configfile: "config.yaml"
 rule all:
     input:
         expand("{name}.tpm.counts", name=config["name"]),
-        expand("{name}.rsem.counts", name=config["name"])
+        expand("{name}.rsem.counts", name=config["name"]),
+        expand("{name}_metadata.csv", name=config["name"]),
+        expand("{name}_violion_plot.png", name=config["name"])
 
 rule RSEM:
     input:
@@ -41,3 +43,18 @@ rule generate_raw_counts_matrix:
         "R/build_matrix_STAR_counts.R"
     doc:
         "Generates raw counts matrix from RSEM results."
+
+rule RNA_QC:
+    input:
+        scRNA = "{name}.rsem.counts"
+    output:
+        metadata = "{name}_metadata.csv",
+        violin_plot = "{name}_violion_plot.png"
+    script:
+        "R/generate_RNA_qc.R"
+    doc:
+        "Generates QC plots and metadata for scRNA data."
+    shell:
+        """
+        Rscript {script} {input.scRNA} {output.metadata} {output.violin_plot}
+        """
