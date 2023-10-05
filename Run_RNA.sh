@@ -73,8 +73,12 @@ echo "RSEM_path: ${RSEM_EXEC}" >> config.yaml  # Using the direct path to the RS
 echo "ref_genome: ${MY_REF_GENOME}" >> config.yaml
 echo "samples:" >> config.yaml
 
-for file in *R1_001.fastq; do
-    sample=`basename $file _R1_001.fastq`
+for file in *R1_001.fastq *R1_001.fastq.gz; do
+    if [[ $file == *_R1_001.fastq ]]; then
+        sample=`basename $file _R1_001.fastq`
+    elif [[ $file == *_R1_001.fastq.gz ]]; then
+        sample=`basename $file _R1_001.fastq.gz`
+    fi
     echo "- ${sample}" >> config.yaml
 done
 

@@ -11,13 +11,15 @@ rule all:
 
 rule RSEM:
     input:
-        R1="{sample}_R1_001.fastq",
-        R2="{sample}_R2_001.fastq"
+        R1="{sample}_R1_001{ext}",
+        R2="{sample}_R2_001{ext}"
     output:
         "{sample}.RSEM.genes.results"
     log: 
         "logs/{sample}.rsem.log"
     threads: 2
+    params:
+        ext = lambda wildcards, input: ".fastq.gz" if input.R1.endswith(".fastq.gz") else ".fastq"
     shell:
         """
         {config[RSEM_path]} --paired-end --star --star-path {config[star_path]} \
