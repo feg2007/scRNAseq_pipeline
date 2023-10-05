@@ -6,9 +6,9 @@ library(gridExtra)
 
 # Read input arguments
 args <- commandArgs(TRUE)
-input_files <- args[1:(length(args)-2)]  # All but the last two arguments
-output_csv <- args[length(args)-1]
-output_plot <- args[length(args)]
+input_files <- snakemake@input
+output_csv <- snakemake@output[["combined_metadata"]]
+output_plot <- snakemake@output[["combined_plot"]]
 
 # Define a function to read data and assign sample attribute
 read_data <- function(filename) {

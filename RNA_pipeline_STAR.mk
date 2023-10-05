@@ -52,10 +52,6 @@ rule RNA_QC:
         violin_plot = "{name}_violion_plot.pdf"
     script:
         "R/generate_RNA_qc.R"
-    shell:
-        """
-        Rscript {script} {input.scRNA} {output.metadata} {output.violin_plot}
-        """
 
 rule combine_qc_metadata:
     input:
@@ -65,7 +61,3 @@ rule combine_qc_metadata:
         combined_plot = "combined_qc_plot.pdf"
     script:
         "R/generate_combined_qc.R"
-    shell:
-        """
-        Rscript {script} {input} {output.combined_metadata} {output.combined_plot}
-        """

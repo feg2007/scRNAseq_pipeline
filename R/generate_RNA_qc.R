@@ -27,9 +27,9 @@ calculate_percent_ribo <- function(seurat_object, gene_pattern = "^RP[SL][[:digi
 
 # Input arguments
 args <- commandArgs(TRUE)
-scRNA_file_path <- args[1]
-output_metadata <- args[2]
-output_violin_plot <- args[3]
+scRNA_file_path <- snakemake@input[["scRNA"]]
+output_metadata <- snakemake@output[["metadata"]]
+output_violin_plot <- snakemake@output[["violin_plot"]]
 
 # Reading genes
 mito_genes <- read_gene_file("Data/Human_Mito_Genes.txt")
