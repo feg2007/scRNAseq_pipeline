@@ -31,7 +31,7 @@ This pipeline integrates Snakemake with a set of scripts and workflows for proce
     ./Process_RNA_Launcher.sh -m path_to_scRNA_FASTQ_sample_dirs/ \
                             -p path_to_pipeline/ \
                             -c path_to_cluster_config/ \
-                            -r path_to_ref_genome/
+                            -r path_to_ref_genome_file/
     ```
 Ensure you've set up the appropriate directory structure as the scripts expect a specific layout.
 
@@ -82,7 +82,7 @@ Path to the directory containing the Snakemake pipeline. This is where your Snak
 Path to the configuration file for cluster parameters. This config file is used to specify cluster resources for each Snakemake rule when submitting jobs. It should be in JSON or YAML format, defining resources for each rule, like CPUs, memory, etc. A sample file is provided but may need to be modified.
 
 ### 4. `REF_GENOME` (r)
-Path to the reference genome to be used for the analysis. (*Note that this is the path to the directory and not the genome fasta itself.*) This needs to be generated using STAR or even through RSEM. See their respecitve documentation for more details ([STAR](https://github.com/alexdobin/STAR), [RSEM](https://deweylab.github.io/RSEM/rsem-prepare-reference.html)).
+Path to the reference genome to be used for the analysis. (*Note that this is the path to a file (any) inside the genome directory.*) This needs to be generated using STAR or even through RSEM. See their respecitve documentation for more details ([STAR](https://github.com/alexdobin/STAR), [RSEM](https://deweylab.github.io/RSEM/rsem-prepare-reference.html)).
 
 Once these parameters are correctly set, you can execute the master_RNA.sh script, and it will in turn utilize the `Run_RNA.sh` script for processing each sample. Remember to ensure that the SLURM scripts have the necessary permissions for execution (```chmod +x script_name.sh```).
 

@@ -11,12 +11,12 @@ rule all:
 
 rule RSEM:
     input:
-        R1="{sample}_R1_001{config[fastq_extension]}",
-        R2="{sample}_R2_001{config[fastq_extension]}"
+        R1="{{sample}}_R1_001{fastq_extension}".format(fastq_extension=config['fastq_extension']),
+        R2="{{sample}}_R2_001{fastq_extension}".format(fastq_extension=config['fastq_extension'])
     output:
         "{sample}.RSEM.genes.results"
     log: 
-        "logs/{sample}.rsem.log"
+        "../logs/{sample}.rsem.log"
     threads: 2
     shell:
         """
