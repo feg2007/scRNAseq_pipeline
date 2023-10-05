@@ -35,8 +35,6 @@ rule generate_matrix:
         matrix=expand("{name}.tpm.counts", name=config["name"])
     script:
         "R/build_matrix_STAR_tpm.R"
-    doc:
-        "Generates TPM counts matrix from RSEM results."
 
 rule generate_raw_counts_matrix:
     input:
@@ -45,8 +43,6 @@ rule generate_raw_counts_matrix:
         matrix=expand("{name}.rsem.counts", name=config["name"])
     script:
         "R/build_matrix_STAR_counts.R"
-    doc:
-        "Generates raw counts matrix from RSEM results."
 
 rule RNA_QC:
     input:
@@ -56,8 +52,6 @@ rule RNA_QC:
         violin_plot = "{name}_violion_plot.pdf"
     script:
         "R/generate_RNA_qc.R"
-    doc:
-        "Generates QC plots and metadata for scRNA data."
     shell:
         """
         Rscript {script} {input.scRNA} {output.metadata} {output.violin_plot}
