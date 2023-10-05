@@ -5,7 +5,7 @@ rule all:
         expand("{name}.tpm.counts", name=config["name"]),
         expand("{name}.rsem.counts", name=config["name"]),
         expand("{name}_metadata.csv", name=config["name"]),
-        expand("{name}_violion_plot.png", name=config["name"])
+        expand("{name}_violion_plot.pdf", name=config["name"])
 
 rule RSEM:
     input:
@@ -49,7 +49,7 @@ rule RNA_QC:
         scRNA = "{name}.rsem.counts"
     output:
         metadata = "{name}_metadata.csv",
-        violin_plot = "{name}_violion_plot.png"
+        violin_plot = "{name}_violion_plot.pdf"
     script:
         "R/generate_RNA_qc.R"
     doc:
