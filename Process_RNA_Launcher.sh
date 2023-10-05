@@ -42,7 +42,7 @@ fi
 for directory in "${META_PATH}"/*; do
     if [[ -d "${directory}/fastq" ]]; then
         echo "Submitting job for directory: ${directory}"
-        sbatch "${RNA_SCRIPT}" "${directory}" "${PIPELINE_PATH}" "${CLUSTER_CONFIG}" "${REF_GENOME}"
+        sbatch "${RNA_SCRIPT}" -s "${directory}" -p "${PIPELINE_PATH}" -c "${CLUSTER_CONFIG}" -r "${REF_GENOME}"
     else
         echo "Warning: No 'fastq' sub-directory found in ${directory}. Skipping..."
     fi
