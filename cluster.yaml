@@ -1,22 +1,31 @@
-"__default__":
-  "job-name": "RNA.{rule}.{wildcards}"
-  "partition": "all"
-  "mem": "10G"
-  "mail-type": "END,FAIL"
-  "mail-user": "youremail@example.com"
-  "cpus-per-task": "2"
-  "time": "05:00:00"
-  "output": "../logs/%x_%j.out"
-  "error": "../logs/%x_%j.out"
+---
+__default__:
+  job-name: RNA.{rule}.{wildcards}
+  partition: all
+  mem: 10G
+  mail-type: END,FAIL
+  mail-user: youremail@example.com
+  cpus-per-task: "2"
+  time: 05:00:00
+  output: ../logs/%x_%j.out
+  error: ../logs/%x_%j.out
 generate_matrix:
-  "mem": "40G"
-  "partition": "himem"
-  "time": "05:00:00"
+  mem: 40G
+  partition: himem
+  time: 05:00:00
 generate_raw_counts_matrix:
-  "mem": "40G"
-  "partition": "himem"
-  "time": "05:00:00"
+  mem: 40G
+  partition: himem
+  time: 05:00:00
 RSEM:
-  "mem": "50G"
-  "partition": "himem"
-  "time": "05:00:00"
+  mem: 50G
+  partition: himem
+  time: 05:00:00
+RNA_QC:
+  mem: 16G
+  partition: all
+  time: 05:00:00
+combine_qc_metadata:
+  mem: 16G
+  partition: all
+  time: 05:00:00
