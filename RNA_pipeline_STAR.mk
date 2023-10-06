@@ -2,8 +2,8 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("{path}/single_lane/{sample}_ME_L001_R1_001.fastq", path=config['path'], sample=config['samples']),
-        expand("{path}/single_lane/{sample}_ME_L001_R2_001.fastq", path=config['path'], sample=config['samples']),
+        expand("{sample}_ME_L001_R1_001.fastq", sample=config['samples']),
+        expand("{sample}_ME_L001_R2_001.fastq", sample=config['samples']),
         expand("{name}.tpm.counts", name=config["name"]),
         expand("{name}.rsem.counts", name=config["name"]),
         expand("{name}_metadata.csv", name=config["name"]),
@@ -13,18 +13,20 @@ rule all:
 
 rule merge_fastqs:
     input:
-        r1=expand("{sample}_L001_R1_001.fastq.gz", sample=config['samples']),
-        r2=expand("{sample}_L001_R2_001.fastq.gz", sample=config['samples'])
+        r1="{sample}_L001_R1_001.fastq.gz".format(sample=config['samples']),
+        r2="{sample}_L001_R2_001.fastq.gz".format(sample=config['samples'])
     output:
         r1_merged="{sample}_ME_L001_R1_001.fastq",
         r2_merged="{sample}_ME_L001_R2_001.fastq"
+    log:
+        "../logs/{sample}.merge.log"
     shell:
         "./merge_script.sh ./ ./ {wildcards.sample}"
 
 rule RSEM:
     input:
-        R1="{path}/single_lane/{sample}_ME_L001_R1_001.fastq".format(path=config['path'], sample=config['samples']),
-        R2="{path}/single_lane/{sample}_ME_L001_R2_001.fastq".format(path=config['path'], sample=config['samples'])
+        R1="{sample}_ME_L001_R1_001.fastq".format(sample=config['samples']),
+        R2="{sample}_ME_L001_R2_001.fastq".format(sample=config['samples'])
     output:
         "{sample}.RSEM.genes.results"
     log: 
