@@ -13,8 +13,8 @@ rule all:
 
 rule merge_fastqs:
     input:
-        r1="{sample}_L001_R1_001.fastq.gz".format(sample=config['samples']),
-        r2="{sample}_L001_R2_001.fastq.gz".format(sample=config['samples'])
+        r1="{sample}_L001_R1_001.fastq.gz"
+        r2="{sample}_L001_R2_001.fastq.gz"
     output:
         r1_merged="{sample}_ME_L001_R1_001.fastq",
         r2_merged="{sample}_ME_L001_R2_001.fastq"
