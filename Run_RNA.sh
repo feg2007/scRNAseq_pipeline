@@ -81,8 +81,8 @@ echo "ref_genome: ${MY_REF_GENOME}" >> config.yaml
 echo "fastq_extension: ${EXTENSION}" >> config.yaml
 echo "samples:" >> config.yaml
 
-for file in *R1_001${EXTENSION}; do
-    sample=`basename $file _R1_001${EXTENSION}`
+for file in *L001_R1_001${EXTENSION}; do
+    sample=`basename $file _L001_R1_001${EXTENSION}`
     echo "- ${sample}" >> config.yaml
 done
 

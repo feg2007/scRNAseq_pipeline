@@ -12,17 +12,14 @@ rule all:
         "combined_qc_plot.pdf"
 
 rule merge_fastqs:
-    input: 
-        r1=expand("{path}/{sample}_L00*_R1_001.fastq.gz", path=config['path'], sample=config['samples']),
-        r2=expand("{path}/{sample}_L00*_R2_001.fastq.gz", path=config['path'], sample=config['samples'])
+    input:
+        r1=expand("{sample}_L001_R1_001.fastq.gz", sample=config['samples']),
+        r2=expand("{sample}_L001_R2_001.fastq.gz", sample=config['samples'])
     output:
-        r1_merged="{path}/single_lane/{sample}_ME_L001_R1_001.fastq",
-        r2_merged="{path}/single_lane/{sample}_ME_L001_R2_001.fastq"
-    params:
-        multi_lane_path="{path}/",
-        single_lane_path="{path}/single_lane/"
+        r1_merged="{sample}_ME_L001_R1_001.fastq",
+        r2_merged="{sample}_ME_L001_R2_001.fastq"
     shell:
-        "./merge_script.sh {params.multi_lane_path} {params.single_lane_path} {wildcards.sample}"
+        "./merge_script.sh ./ ./ {wildcards.sample}"
 
 rule RSEM:
     input:
