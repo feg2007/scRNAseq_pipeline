@@ -77,6 +77,7 @@ echo "path: ${MY_PATH}/fastq" > config.yaml
 echo "name: ${name}" >> config.yaml
 echo "star_path: ${STAR_DIR}" >> config.yaml  # Using the determined STAR directory path
 echo "RSEM_path: ${RSEM_EXEC}" >> config.yaml  # Using the direct path to the RSEM executable
+echo "pipeline_path: ${MY_PIPELINE}" > config.yaml
 echo "ref_genome: ${MY_REF_GENOME}" >> config.yaml
 echo "fastq_extension: ${EXTENSION}" >> config.yaml
 echo "samples:" >> config.yaml
