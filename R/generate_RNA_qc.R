@@ -26,7 +26,7 @@ add_percent_metadata <- function(object, gene_set, col_name) {
 calculate_percent_ribo <- function(seurat_object, gene_pattern = "^RP[SL][[:digit:]]") {
     ribo_genes <- grep(pattern = gene_pattern, x = rownames(x = seurat_object@assays$RNA@data), value = TRUE)
     percent_ribo <- Matrix::colSums(seurat_object@assays$RNA@counts[ribo_genes, ]) / Matrix::colSums(seurat_object@assays$RNA@counts) * 100
-    seurat_object <- AddMetaData(object = seurat_object, metadata = percent_ribo, col.name = "percent.ribo")
+    seurat_object <- AddMetaData(object = seurat_object, metadata = percent_ribo, col.name = "percent_ribo")
     return(seurat_object)
 }
 
@@ -53,7 +53,7 @@ seurat_obj <- add_percent_metadata(seurat_obj, house_genes, "percent_house")
 seurat_obj <- calculate_percent_ribo(seurat_obj)
 
 # Visualization and save the plot
-plot <- VlnPlot(object = seurat_obj, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo", "percent_mito"))
+plot <- VlnPlot(object = seurat_obj, features = c("nFeature_RNA", "nCount_RNA", "percent_ribo", "percent_mito"))
 ggsave(filename = output_violin_plot, plot = plot, width = 10, height = 8)
 
 # Saving Output
