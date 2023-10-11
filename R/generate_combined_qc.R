@@ -24,8 +24,8 @@ allQC <- do.call(rbind, lapply(input_files, read_data))
 
 # Apply filters
 allQC <- allQC[allQC$nFeature_RNA > 500 & 
-               allQC$percent.mito < 25 & 
-               allQC$percent.ribo < 25 & 
+               allQC$percent_mito < 25 & 
+               allQC$percent_ribo < 25 & 
                allQC$nCount_RNA < quantile(allQC$nCount_RNA, 0.999),]
 
 # Order the factor levels of Sample based on sample names
@@ -52,8 +52,8 @@ create_plot <- function(y_axis, y_label, y_limit = NULL, y_intercept = NULL) {
 
 plot_nFeature_RNA <- create_plot(allQC$nFeature_RNA, "no. of genes", c(-5, 15000), 500)
 plot_nCount_RNA <- create_plot(allQC$nCount_RNA, "no. of reads")
-plot_percent_mito <- create_plot(allQC$percent.mito, "Percentage mithocondrial genes", c(-5, 105), 25)
-plot_percent_ribo <- create_plot(allQC$percent.ribo, "Percentage ribosomal genes", c(-5, 105), 25)
+plot_percent_mito <- create_plot(allQC$percent_mito, "Percentage mithocondrial genes", c(-5, 105), 25)
+plot_percent_ribo <- create_plot(allQC$percent_ribo, "Percentage ribosomal genes", c(-5, 105), 25)
 
 combined_plot <- grid.arrange(plot_nFeature_RNA, plot_nCount_RNA, plot_percent_mito, plot_percent_ribo)
 
