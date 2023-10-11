@@ -37,8 +37,8 @@ output_metadata <- snakemake@output[["metadata"]]
 output_violin_plot <- snakemake@output[["violin_plot"]]
 
 # Reading genes
-mito_genes <- read_gene_file(paste0(snakemake@config[["pipeline_path"]], "Data/Human_Mito_Genes.txt"))
-house_genes <- read_gene_file(paste0(snakemake@config[["pipeline_path"]], "Data/HSIAO_housekeeping_genes.txt"))
+mito_genes <- read_gene_file(paste0(snakemake@config[["pipeline_path"]], "/Data/Human_Mito_Genes.txt"))
+house_genes <- read_gene_file(paste0(snakemake@config[["pipeline_path"]], "/Data/HSIAO_housekeeping_genes.txt"))
 
 # Loading scRNA data
 scRNA <- read.table(scRNA_file_path, sep = "\t", header = TRUE, row.names = 1)
