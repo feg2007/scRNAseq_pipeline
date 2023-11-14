@@ -14,6 +14,10 @@ merge_files() {
     # The rest of the arguments are input files to be merged
     local -a input_files=("$@")
 
+    # Sort the input files
+    IFS=$'\n' sorted_input_files=($(sort <<<"${input_files[*]}"))
+    unset IFS
+
     # Determine the read type from the output file name
     if [[ "$output_path" =~ R1 ]]; then
         read_type="R1"
@@ -26,7 +30,7 @@ merge_files() {
 
     # Merge the input files
     echo "Merging $read_type"
-    zcat "${input_files[@]}" > "${output_path%.fastq}.fastq"
+    zcat "${sorted_input_files[@]}" > "${output_path%.fastq}.fastq"
     echo "Output file: ${output_path}"
 
     # Check if the output file exists
