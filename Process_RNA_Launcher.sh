@@ -12,7 +12,7 @@
 #SBATCH --output=slurm_outputs/%x_%j.out
 #SBATCH --error=slurm_outputs/%x_%j.out
 
-while getopts ":m:p:c:r:" opt; do
+while getopts ":m:p:c:r:j:" opt; do
   case $opt in
     m) META_PATH="$OPTARG"
     ;;
@@ -22,14 +22,16 @@ while getopts ":m:p:c:r:" opt; do
     ;;
     r) REF_GENOME="$OPTARG"
     ;;
+    j) JOBS="$OPTARG"
+    ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
 done
 
-Check if mandatory arguments are provided
-if [ -z "$META_PATH" ] || [ -z "$PIPELINE_PATH" ] || [ -z "$CLUSTER_CONFIG" ] || [ -z "$REF_GENOME" ]; then
-    echo "Usage: $0 -m <path_to_RNA_FASTQs> -p <path_to_pipeline_directory> -c <cluster_config_file> -r <path_to_ref_genome>"
+# Check if mandatory arguments are provided
+if [ -z "$META_PATH" ] || [ -z "$PIPELINE_PATH" ] || [ -z "$CLUSTER_CONFIG" ] || [ -z "$REF_GENOME" ] || [ -z "$JOBS" ]; then
+    echo "Usage: $0 -m <path_to_RNA_FASTQs> -p <path_to_pipeline_directory> -c <cluster_config_file> -r <path_to_ref_genome> -j <number_of_jobs>"
     exit 1
 fi
 
@@ -41,7 +43,7 @@ for directory in "$META_PATH" "$PIPELINE_PATH"; do
     fi
 done
 
-Check if CLUSTER_CONFIG is a valid file
+# Check if CLUSTER_CONFIG is a valid file
 if [[ ! -f "$CLUSTER_CONFIG" ]]; then
     echo "Error: '${CLUSTER_CONFIG}' is not a valid file!"
     exit 3
@@ -62,8 +64,7 @@ echo "ref_genome: ${REF_GENOME}" >> config.yaml
 snakemake -s ${PIPELINE_PATH}/RNA_pipeline_STAR.mk \
           --configfile ${META_PATH}/config.yaml \
           --nolock \
-          --jobs 8 \
+          --jobs ${JOBS} \
           --latency-wait 60 \
           --cluster-config ${CLUSTER_CONFIG} \
           --cluster "sbatch -J {cluster.job-name} -p {cluster.partition} -t {cluster.time} -c {cluster.cpus-per-task} --mem={cluster.mem} -o {cluster.output} -e {cluster.error} --mail-type={cluster.mail-type} --mail-user={cluster.mail-user}"
-          
