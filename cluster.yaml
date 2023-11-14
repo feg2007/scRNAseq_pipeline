@@ -7,8 +7,8 @@ __default__:
   mail-user: youremail@example.com
   cpus-per-task: "2"
   time: 05:00:00
-  output: %x_%j.out
-  error: %x_%j.out
+  output: ./%x_%j.out
+  error: ./%x_%j.out
 generate_matrix:
   mem: 40G
   partition: himem
