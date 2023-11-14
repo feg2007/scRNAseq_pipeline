@@ -1,82 +1,127 @@
+import os
 import glob
+
+# Load configuration
 configfile: "config.yaml"
+
+sample_dirs = [d for d in next(os.walk('.'))[1] if d != "logs" and not d.startswith('.')]
+
+# Function to get cells for each sample
+def get_cells(sample):
+    fastq_files = glob.glob(os.path.join(sample, "fastq", "*.fastq.gz"))
+    cells = set(os.path.basename(f).split("_L00")[0] for f in fastq_files)
+    return list(cells)
+
+# Collect all expected output files for the `all` rule
+output_files = []
+for sample in sample_dirs:
+    for cell in get_cells(sample):
+        for read in [1, 2]:
+            output_files.append(f"{sample}/merged/{cell}_ME_L001_R{read}_001.fastq")
+
+# Collect all expected RSEM output files for the `all` rule
+rsem_output_files = []
+for sample in sample_dirs:
+    cells = get_cells(sample)
+    for cell in cells:
+        rsem_output_files.append(f"{sample}/RSEM/{cell}.RSEM.genes.results")
+
+def get_rsem_results_for_sample(sample):
+    cells = get_cells(sample)
+    return expand("{sample}/RSEM/{cell}.RSEM.genes.results", sample=sample, cell=cells)
+
+tpm_output_files = []
+count_output_files = []
+qc_files = []
+for sample in sample_dirs:
+    if sample == "logs":
+        continue
+    tpm_output_files.append(f"{sample}/{sample}.tpm.counts")
+    count_output_files.append(f"{sample}/{sample}.rsem.counts")
+    qc_files.append(f"{sample}/{sample}_metadata.csv")
+    qc_files.append(f"{sample}/{sample}_violion_plot.pdf")
 
 rule all:
     input:
-        expand("{sample}_ME_L001_R1_001.fastq", sample=config['samples']),
-        expand("{sample}_ME_L001_R2_001.fastq", sample=config['samples']),
-        expand("{name}.tpm.counts", name=config["name"]),
-        expand("{name}.rsem.counts", name=config["name"]),
-        expand("{name}_metadata.csv", name=config["name"]),
-        expand("{name}_violion_plot.pdf", name=config["name"]),
+        output_files,
+        rsem_output_files,
+        tpm_output_files,
+        count_output_files,
+        qc_files,
         "combined_metadata.csv",
         "combined_qc_plot.pdf"
 
-def get_lanes(sample, read):
-    return sorted(glob.glob(f"{sample}_L00*_R{read}_001.fastq.gz"))
-
-rule merge_fastq:
+rule merge_lanes:
     input:
-        r1 = lambda wildcards: get_lanes(wildcards.sample, 1),
-        r2 = lambda wildcards: get_lanes(wildcards.sample, 2)
+        r1=lambda wildcards: glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R1_001.fastq.gz"),
+        r2=lambda wildcards: glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R2_001.fastq.gz")
     output:
-        r1_merged = "{sample}_ME_L001_R1_001.fastq",
-        r2_merged = "{sample}_ME_L001_R2_001.fastq"
-    params:
-        input_dir = ".",
-        output_dir = "."
+        r1="{sample}/merged/{cell}_ME_L001_R1_001.fastq",
+        r2="{sample}/merged/{cell}_ME_L001_R2_001.fastq"
+    log:
+        "logs/merge_lanes_{sample}_{cell}.log"
     shell:
         """
-        {config[pipeline_path]}/merge_lanes.sh {params.input_dir} {params.output_dir} {wildcards.sample}
+        {config[pipeline_path]}/merge_lanes.sh {output.r1} {input.r1}
+        {config[pipeline_path]}/merge_lanes.sh {output.r2} {input.r2}
         """
 
 rule RSEM:
     input:
-        R1="{sample}_ME_L001_R1_001.fastq",
-        R2="{sample}_ME_L001_R2_001.fastq"
+        r1="{sample}/merged/{cell}_ME_L001_R1_001.fastq",
+        r2="{sample}/merged/{cell}_ME_L001_R2_001.fastq"
     output:
-        "{sample}.RSEM.genes.results"
+        "{sample}/RSEM/{cell}.RSEM.genes.results"
     log: 
-        "../logs/{sample}.rsem.log"
-    threads: 2
+        "logs/{sample}_{cell}.rsem.log"
+    threads: 8
     shell:
         """
-        {config[RSEM_path]} --paired-end --star --star-path {config[star_path]} \
-            -p {threads} {config[path]}/{input.R1} {config[path]}/{input.R2} \
-            {config[ref_genome]} {config[path]}/{wildcards.sample}.RSEM \
+        output_prefix=`python -c "print('{output}'.replace('.genes.results', ''))"`
+        rsem-calculate-expression --paired-end --star --star-path $(dirname $(which STAR)) \
+            -p {threads} {input.r1} {input.r2} \
+            {config[ref_genome]} $output_prefix \
             > {log} 2>&1
         """
 
 rule generate_matrix:
     input:
-        file=expand("{dataset}.RSEM.genes.results", dataset=config["samples"])
+        lambda wildcards: get_rsem_results_for_sample(wildcards.sample)
     output:
-        matrix=expand("{name}.tpm.counts", name=config["name"])
+        matrix="{sample}/{sample}.tpm.counts"
+    log:
+        "logs/{sample}.generate_matrix.log"
     script:
         "R/build_matrix_STAR_tpm.R"
 
 rule generate_raw_counts_matrix:
     input:
-        files=expand("{dataset}.RSEM.genes.results", dataset=config["samples"])
+        lambda wildcards: get_rsem_results_for_sample(wildcards.sample)
     output:
-        matrix=expand("{name}.rsem.counts", name=config["name"])
+        matrix="{sample}/{sample}.rsem.counts"
+    log:
+        "logs/{sample}.generate_raw_counts_matrix.log"
     script:
         "R/build_matrix_STAR_counts.R"
 
 rule RNA_QC:
     input:
-        scRNA = "{name}.rsem.counts"
+        scRNA = lambda wildcards: f"{wildcards.sample}/{wildcards.sample}.rsem.counts"
     output:
-        metadata = "{name}_metadata.csv",
-        violin_plot = "{name}_violion_plot.pdf"
+        metadata = "{sample}/{sample}_metadata.csv",
+        violin_plot = "{sample}/{sample}_violion_plot.pdf"
+    log:
+        "logs/{sample}.RNA_QC.log"
     script:
         "R/generate_RNA_qc.R"
 
 rule combine_qc_metadata:
     input:
-        expand("{name}_metadata.csv", name=config["name"])
+        expand("{sample}/{sample}_metadata.csv", sample=sample_dirs)
     output:
         combined_metadata = "combined_metadata.csv",
         combined_plot = "combined_qc_plot.pdf"
+    log:
+        "logs/combine_qc_metadata.log"
     script:
         "R/generate_combined_qc.R"

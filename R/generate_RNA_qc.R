@@ -4,6 +4,10 @@
 # libraries_to_load <- c("Seurat", "Matrix", "ggplot2", "readr")
 # lapply(libraries_to_load, library, character.only = TRUE)
 
+log <- file(snakemake@log[[1]], open="wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 library(readr)
 library(ggplot2)
 library(Matrix)
@@ -20,12 +24,14 @@ read_gene_file <- function(filename) {
 add_percent_metadata <- function(object, gene_set, col_name) {
   percent <- colSums(object@assays$RNA@counts[gene_set, ]) / colSums(object@assays$RNA@counts)
   percent <- percent * 100
+  percent[is.nan(percent)] <- 0
   AddMetaData(object, metadata = percent, col.name = col_name)
 }
 
 calculate_percent_ribo <- function(seurat_object, gene_pattern = "^RP[SL][[:digit:]]") {
     ribo_genes <- grep(pattern = gene_pattern, x = rownames(x = seurat_object@assays$RNA@data), value = TRUE)
     percent_ribo <- Matrix::colSums(seurat_object@assays$RNA@counts[ribo_genes, ]) / Matrix::colSums(seurat_object@assays$RNA@counts) * 100
+    percent_ribo[is.nan(percent_ribo)] <- 0
     seurat_object <- AddMetaData(object = seurat_object, metadata = percent_ribo, col.name = "percent_ribo")
     return(seurat_object)
 }
@@ -51,6 +57,9 @@ seurat_obj <- CreateSeuratObject(scRNA, project = "test")
 seurat_obj <- add_percent_metadata(seurat_obj, mito_genes, "percent_mito")
 seurat_obj <- add_percent_metadata(seurat_obj, house_genes, "percent_house")
 seurat_obj <- calculate_percent_ribo(seurat_obj)
+
+print(seurat_obj)
+print(as.data.frame(seurat_obj@meta.data))
 
 # Visualization and save the plot
 plot <- VlnPlot(object = seurat_obj, features = c("nFeature_RNA", "nCount_RNA", "percent_ribo", "percent_mito"))

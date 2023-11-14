@@ -3,9 +3,17 @@
 # Input: Directory path with .RSEM.genes.results files (from Snakemake).
 # Output: Raw counts matrix with gene SYMBOLs as row names.
 
+log <- file(snakemake@log[[1]], open="wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 # Capture snakemake inputs and outputs
 input_path <- snakemake@config[["path"]]
 output_file <- snakemake@output[["matrix"]]
+
+input_path <- paste0(input_path, "/", dirname(output_file), "/RSEM/")
+print(paste0("Input path: ", input_path))
+print(paste0("Output file: ", output_file))
 
 # Check for required libraries
 required_packages <- c("Homo.sapiens", "data.table")
@@ -24,6 +32,7 @@ expr_matrices <- lapply(expr_files, function(file){
   setNames(dt[,"expected_count"], dt[,1])  # Set rownames using the first column (gene IDs)
 })
 expr_matrix <- do.call(cbind, expr_matrices)
+colnames(expr_matrix) <- gsub(".RSEM.genes.results$", "", basename(expr_files))
 
 # Annotate genes
 info <- select(Homo.sapiens, keys = rownames(expr_matrix), columns = c("SYMBOL", "ALIAS"), keytype = "ENSEMBL")

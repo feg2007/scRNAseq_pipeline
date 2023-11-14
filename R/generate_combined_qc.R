@@ -58,7 +58,7 @@ plot_percent_ribo <- create_plot(allQC$percent_ribo, "Percentage ribosomal genes
 combined_plot <- grid.arrange(plot_nFeature_RNA, plot_nCount_RNA, plot_percent_mito, plot_percent_ribo)
 
 # Save the combined plot
-ggsave(filename = output_plot, plot = combined_plot, width = 20, height = 20)
+ggsave(filename = output_plot, plot = combined_plot, width = 3 + (2 * length(unique(allQC$Sample))), height = 10)
 
 # Save the aggregated data
 write.csv(allQC, file = output_csv)
