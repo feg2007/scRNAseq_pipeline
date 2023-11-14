@@ -53,8 +53,8 @@ rule all:
 
 rule merge_lanes:
     input:
-        r1=lambda wildcards: glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R1_001.fastq.gz"),
-        r2=lambda wildcards: glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R2_001.fastq.gz")
+        r1=lambda wildcards: sorted(glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R1_001.fastq.gz")),
+        r2=lambda wildcards: sorted(glob.glob(f"{wildcards.sample}/fastq/{wildcards.cell}_L00*_R2_001.fastq.gz"))
     output:
         r1="{sample}/merged/{cell}_ME_L001_R1_001.fastq",
         r2="{sample}/merged/{cell}_ME_L001_R2_001.fastq"
