@@ -34,7 +34,7 @@ tpm_output_files = []
 count_output_files = []
 qc_files = []
 for sample in sample_dirs:
-    if sample == "logs":
+    if sample == "logs" or sample == "slurm_logs":
         continue
     tpm_output_files.append(f"{sample}/{sample}.tpm.counts")
     count_output_files.append(f"{sample}/{sample}.rsem.counts")
