@@ -4,7 +4,7 @@ import glob
 # Load configuration
 configfile: "config.yaml"
 
-sample_dirs = [d for d in next(os.walk('.'))[1] if d != "logs" and not d.startswith('.')]
+sample_dirs = [d for d in next(os.walk('.'))[1] if d != "logs" and not d.startswith('.') and d != "slurm_logs"]
 
 # Function to get cells for each sample
 def get_cells(sample):
