@@ -1,21 +1,29 @@
-# Single-Cell RNA-Seq Analysis Pipeline with Snakemake
+# Single-Cell RNA-Seq Processing Pipeline for smart-RRBS data
 
 A comprehensive pipeline for processing single-cell RNA-Seq data, generating TPM and raw counts matrices from RSEM results, and annotating them with gene symbols.
 
 ## Description
 
-This pipeline integrates Snakemake with a set of scripts and workflows for processing single-cell RNA-Seq data. It reads RSEM results from multiple paired-end fastq files for each cell within a sample, extracts TPM values and raw counts, and creates matrices annotated with gene symbols from the ENSEMBL database.
+This pipeline is meant to be used with RNA-Seq raw data generated using the smart-RRBS protocol. It merges the fastq files for each cell within a sample, and then uses STAR and RSEM to align the reads to the reference genome and generate TPM and raw counts matrices for each sample.
 
-## Requirements
+## Initial Setup
 
-- R (> 4.0.0)
-  - Packages: [`Homo.sapiens`](https://www.bioconductor.org/packages/Homo.sapiens/), [`data.table`](https://cran.r-project.org/package=data.table)
-- [Snakemake](https://snakemake.readthedocs.io/en/stable/) (>= 7.3.8)
-- [STAR](https://github.com/alexdobin/STAR) (>= 2.7.9a)
-- [RSEM](https://deweylab.github.io/RSEM/) (>= 1.3.0)
-- Python (>= 3.6)
+It is recommended to use [`conda`]()/[`mamba`]() to install the necessary dependencies. The following commands will create a new environment and install the necessary packages:
+```bash
+mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra
+```
 
-**Note:** Older versions may work. However these recommendations are the versions with which this pipeline was tested.
+After the environment is setup, activate it with the following command:
+```bash
+mamba activate snakemake_rna
+```
+
+
+
+**Note:** Currently there is a known bug with the `txdb.hsapiens.ucsc.hg19.knowngene` R package a dependency of the `Homo.sapiens` package. If an error occurs in installation related to this package please try the following instead:
+```bash
+mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra bioconductor-txdb.hsapiens.ucsc.hg19.knowngene=3.2.2=r43hdfd78af_15
+```
 
 ## Usage
 
@@ -41,6 +49,7 @@ Ensure you've set up the appropriate directory structure as the scripts expect a
 2. Matrix Generation: Reads the RSEM results to generate:
    - TPM matrix (with gene symbols as row names).
    - Raw counts matrix (with gene symbols as row names).
+3. Generate QC plots: Generates QC plots for each sample using the TPM matrix. Another plot combining the QC plots for all samples is also generated.
 
 ## Input Directory Structure
 The expected directory structure for input files is:
@@ -66,8 +75,12 @@ path_to_scRNA_FASTQ_sample_dirs/
 
 ## Outputs
 For each sample, you will obtain:
-1. `.tpm.counts file`: A matrix of TPM values with genes as rows and cells as columns.
-2. `.rsem.counts file`: A matrix of raw counts with genes as rows and cells as columns.
+1. `<sample_name>.tpm.counts file`: A matrix of TPM values with genes as rows and cells as columns.
+2. `<sample_name>.rsem.counts file`: A matrix of raw counts with genes as rows and cells as columns.
+3. `<sample_name>_metadata.csv`: A metadata file containing information about the cells in the sample. Contains the following columns: nCount_RNA, nFeature_RNA, percent_mito, percent_house, percent_ribo where the last three columns denote the percentage of mitochondrial, housekeeping, and ribosomal genes respectively.
+4. `<sample_name>_violin_plot.pdf`: A violin plot showing the distribution of the nFeature_RNA, nCount_RNA, percent_ribo and percent_mito columns.
+
+The root folder will also contain a `combined_metadata.csv` file which contains the metadata for all samples combined. It will also contain a `combined_violin_plot.pdf` file which contains the violin plots for all samples combined.
 
 ## Parameters for `Process_RNA_Launcher.sh`
 When executing the `Process_RNA_Launcher.sh` script, it requires several parameters to function correctly:
@@ -83,7 +96,7 @@ Path to the directory containing the Snakemake pipeline. This is where your Snak
 Path to the configuration file for cluster parameters. This config file is used to specify cluster resources for each Snakemake rule when submitting jobs. It should be in JSON or YAML format, defining resources for each rule, like CPUs, memory, etc. A sample file is provided but may need to be modified.
 
 ### 4. `REF_GENOME` (r)
-Path to the reference genome to be used for the analysis. (*Note that this is the path to the prefix of the genome file. i.e. <path>/<to>/human_hg38.*) This needs to be generated using STAR or even through RSEM. See their respecitve documentation for more details ([STAR](https://github.com/alexdobin/STAR), [RSEM](https://deweylab.github.io/RSEM/rsem-prepare-reference.html)).
+Path to the reference genome to be used for the analysis. (*Note that this is the path to the prefix of the genome file. i.e. `<path>/<to>/human_hg38`) This needs to be generated using STAR or even through RSEM. See their respecitve documentation for more details ([STAR](https://github.com/alexdobin/STAR), [RSEM](https://deweylab.github.io/RSEM/rsem-prepare-reference.html)).
 
 Once these parameters are correctly set, you can execute the master_RNA.sh script, and it will in turn utilize the `Run_RNA.sh` script for processing each sample. Remember to ensure that the SLURM scripts have the necessary permissions for execution (```chmod +x script_name.sh```).
 
