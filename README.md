@@ -10,7 +10,7 @@ This pipeline is meant to be used with RNA-Seq raw data generated using the smar
 
 It is recommended to use [`conda`]()/[`mamba`]() to install the necessary dependencies. The following commands will create a new environment and install the necessary packages:
 ```bash
-mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra
+mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra bioconductor-ensdb.hsapiens.v86
 ```
 
 After the environment is setup, activate it with the following command:
@@ -22,7 +22,7 @@ mamba activate snakemake_rna
 
 **Note:** Currently there is a known bug with the `txdb.hsapiens.ucsc.hg19.knowngene` R package a dependency of the `Homo.sapiens` package. If an error occurs in installation related to this package please try the following instead:
 ```bash
-mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra bioconductor-txdb.hsapiens.ucsc.hg19.knowngene=3.2.2=r43hdfd78af_15
+mamba create -c r -c conda-forge -c bioconda -n snakemake_rna snakemake python rsem star r-data.table r-ggplot2 r-Seurat r-seuratobject=4.1.4 r-readr r-Matrix bioconductor-homo.sapiens r-gridExtra bioconductor-txdb.hsapiens.ucsc.hg19.knowngene=3.2.2=r43hdfd78af_15 bioconductor-ensdb.hsapiens.v86
 ```
 
 ## Usage

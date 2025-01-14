@@ -16,11 +16,11 @@ print(paste0("Input path: ", input_path))
 print(paste0("Output file: ", output_file))
 
 # Check for required libraries
-required_packages <- c("Homo.sapiens", "data.table")
+required_packages <- c("EnsDb.Hsapiens.v86", "data.table")
 new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) stop(paste("Missing packages:", paste(new_packages, collapse=", ")))
 
-library(Homo.sapiens)
+library(EnsDb.Hsapiens.v86)
 library(data.table)
 
 # List and read RSEM files
@@ -35,7 +35,7 @@ expr_matrix <- do.call(cbind, expr_matrices)
 colnames(expr_matrix) <- gsub(".RSEM.genes.results$", "", basename(expr_files))
 
 # Annotate genes
-info <- select(Homo.sapiens, keys = rownames(expr_matrix), columns = c("SYMBOL", "ALIAS"), keytype = "ENSEMBL")
+info <- select(EnsDb.Hsapiens.v86, keys = rownames(expr_matrix), columns = c("SYMBOL"), keytype = "TXID")
 
 # Remove duplicate and NA SYMBOLs
 unique_symbols <- !duplicated(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)])
