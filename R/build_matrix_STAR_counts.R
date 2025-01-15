@@ -35,15 +35,15 @@ expr_matrix <- do.call(cbind, expr_matrices)
 colnames(expr_matrix) <- gsub(".RSEM.genes.results$", "", basename(expr_files))
 
 # Annotate genes
-info <- select(EnsDb.Hsapiens.v86, keys = rownames(expr_matrix), columns = c("SYMBOL"), keytype = "TXID")
+info <- select(EnsDb.Hsapiens.v86, keys = rownames(expr_matrix), columns = c("SYMBOL"), keytype = "GENEID")
 
 # Remove duplicate and NA SYMBOLs
-unique_symbols <- !duplicated(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)])
-non_na_symbols <- !is.na(info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)])
+unique_symbols <- !duplicated(info$SYMBOL[match(rownames(expr_matrix), info$GENEID)])
+non_na_symbols <- !is.na(info$SYMBOL[match(rownames(expr_matrix), info$GENEID)])
 expr_matrix <- expr_matrix[unique_symbols & non_na_symbols, ]
 
 # Update row names with SYMBOLs
-rownames(expr_matrix) <- info$SYMBOL[match(rownames(expr_matrix), info$ENSEMBL)]
+rownames(expr_matrix) <- info$SYMBOL[match(rownames(expr_matrix), info$GENEID)]
 
 # Write the matrix using fwrite
 fwrite(as.data.table(expr_matrix, keep.rownames = "GeneID"), file = output_file, sep = "\t", quote = FALSE)
